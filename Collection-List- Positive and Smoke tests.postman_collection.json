@@ -1,0 +1,244 @@
+{
+  "info": {
+    "_postman_id": "1ed5e2f6-abe0-42c0-8abb-c8f169f8957e",
+    "name": "Collection-List- Positive and Smoke tests",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "32523837"
+  },
+  "item": [
+    {
+      "name": "Login-gettoken",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "if (pm.response.headers.get('Content-Type') &&",
+              "    pm.response.headers.get('Content-Type').includes('application/json')) {",
+              "",
+              "    let jsonData = pm.response.json();",
+              "",
+              "    // Optional: add some tests",
+              "    pm.test(\"Response has token\", function () {",
+              "        pm.expect(jsonData).to.have.property(\"token\");",
+              "    });",
+              "",
+              "    pm.environment.set(\"token\", jsonData.token);",
+              "} else {",
+              "    // Optional test to surface the problem",
+              "    pm.test(\"Response is JSON\", function () {",
+              "        pm.expect.fail(\"Expected JSON but got: \" + pm.response.headers.get('Content-Type'));",
+              "    });",
+              "}"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"email\": \"test2@fake.com\",\n    \"password\": \"myNewPassword\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/users/login",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "users",
+            "login"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Add Contact - Positive Case",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 201\", function () {",
+              "    pm.response.to.have.status(201);",
+              "});",
+              "",
+              "pm.test(\"Response has id\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData).to.have.property(\"id\");",
+              "    ",
+              "    // Save id for later requests",
+              "    pm.environment.set(\"contactId\", jsonData.id);",
+              "});",
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"firstName\": \"Test\",\n  \"lastName\": \"User\",\n  \"email\": \"{{email}}\",\n  \"password\": \"{{password}}\"\n}\n",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/contacts",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "contacts"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Get contact",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test(\"Response is an array of contacts\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData).to.be.an(\"array\");",
+              "});",
+              "",
+              "pm.test(\"At least one contact exists\", function () {",
+              "    pm.expect(pm.response.json().length).to.be.above(0);",
+              "});",
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      },
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}",
+            "type": "text"
+          },
+          {
+            "key": "Accept",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "[\n  {\n    \"_id\": \"65abc123...\",\n    \"firstName\": \"John\",\n    \"lastName\": \"Doe\",\n    \"email\": \"jdoe@fake.com\"\n  }\n]",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/users",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "users"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Update Contact",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}",
+            "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"firstName\": \"Anna\",\n  \"lastName\": \"Miller\",\n  \"birthdate\": \"1992-02-02\",\n  \"email\": \"amiller@fake.com\",\n  \"phone\": \"8005554242\",\n  \"street1\": \"13 School St.\",\n  \"street2\": \"Apt. 5\",\n  \"city\": \"Washington\",\n  \"stateProvince\": \"QC\",\n  \"postalCode\": \"12345\",\n  \"country\": \"Canada\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/contacts/{{contactId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "contacts",
+            "{{contactId}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Delete Contact",
+      "request": {
+        "method": "GET",
+        "header": []
+      },
+      "response": []
+    }
+  ]
+}
